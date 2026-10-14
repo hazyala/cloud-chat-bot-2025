@@ -4,6 +4,18 @@
 
 Gemini 모델을 선택해 대화하는 React 챗봇. 같은 채팅 핸들러를 로컬 Vite 서버와 Vercel 함수에서 사용한다.
 
+## 서비스 화면
+
+배포 사이트에서 캡처한 시작 화면, 모델 선택, 대화 입력 화면입니다. 모델을 정한 뒤 채팅 화면으로 진입하는 흐름을 보여줍니다.
+
+| 시작 | 모델 선택 |
+| :---: | :---: |
+| ![Cloud Chat Bot 시작 화면](./docs/screenshots/01-start.png) | ![Gemini 모델 선택 화면](./docs/screenshots/02-model-options.png) |
+
+| 대화 화면 |
+| :---: |
+| ![선택한 모델과 메시지 입력창이 보이는 대화 화면](./docs/screenshots/03-chat-ready.png) |
+
 ## 대화가 처리되는 방식
 
 홈에서 모델을 고른 뒤 채팅 화면으로 이동한다. `useChat`이 대화 목록과 전송 상태를 관리하고, 지금까지의 메시지를 `/api/chat`에 보낸다. 서버는 assistant 역할을 Gemini의 `model` 역할로 바꿔 `generateContent`를 호출한다. API 키는 서버의 환경변수에서 읽는다.
