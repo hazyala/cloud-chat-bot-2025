@@ -67,11 +67,14 @@ npm run dev -- --host 127.0.0.1
 | `GEMINI_API_KEY` | 서버에서 Gemini를 호출하는 키, 필수 |
 | `GEMINI_DEFAULT_MODEL` | 요청에 model이 없을 때 사용할 모델. 공용 허용 목록에 있어야 한다 |
 
-모델 ID는 코드의 허용 목록을 뜻한다. Google 계정에서 실제 호출 가능한지는 별도로 확인해야 한다.
+기본 모델은 `gemini-3.5-flash-lite`이며 `gemini-3.8-flash`, `gemini-3.1-flash-lite`도 선택할 수 있다. [Google 공식 모델 목록](https://ai.google.dev/gemini-api/docs/models)에 맞춰 지원하지 않는 `gemini-3.5-flash`와 신규 프로젝트 접근이 제한된 2.5 모델을 선택 목록에서 교체했다. 기존 배포의 `GEMINI_DEFAULT_MODEL`도 허용 목록에 맞게 갱신해야 한다. Google 계정의 모델 접근 권한과 할당량은 별도로 확인해야 한다.
+
+REST `v1beta/models/{model}:generateContent`를 사용하며 키는 `x-goog-api-key` 헤더로 전송한다. 최신 모델의 기본 생성 설정을 사용하고 출력 한도는 사고 토큰을 고려해 8192로 설정한다. 응답의 `thought` 부분은 답변에서 제외한다.
 
 ```bash
 npm run lint
 npm run build
+npm test
 ```
 
 `npm run preview`는 정적 빌드 확인용이다. `configureServer`에서 등록한 로컬 API는 preview에 등록되지 않으므로 전체 채팅 확인에는 `npm run dev` 또는 Vercel 함수 환경이 필요하다.
@@ -82,7 +85,7 @@ npm run build
 
 ```json
 {
-  "model": "gemini-3.1-flash-lite",
+  "model": "gemini-3.5-flash-lite",
   "messages": [{"role": "user", "content": "안녕"}]
 }
 ```
@@ -96,4 +99,4 @@ npm run build
 | 502 | Gemini의 빈 답변 |
 | 503 | 외부 API 연결 실패 |
 
-오류 본문은 `error`, `statusCode`를 포함하고 Gemini 오류 상태도 전달한다. `messages`는 배열이며 각 `content`는 문자열이어야 한다. 임의 타입을 검증하는 완전한 request schema, 사용자별 rate limit, 영구 저장은 현재 없다.
+오류 본문은 `error`, `statusCode`를 포함하고 Gemini 오류 상태도 전달한다. `messages`는 배열이며 각 `content`는 문자열, `role`은 user 또는 assistant여야 한다. 잘못된 메시지는 400으로 반환한다. 사용자별 rate limit과 영구 저장은 현재 없다.

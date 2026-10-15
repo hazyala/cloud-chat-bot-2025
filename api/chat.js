@@ -5,7 +5,7 @@ const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models
 
 function readText(parts = []) {
   return parts
-    .map((part) => (typeof part.text === "string" ? part.text : ""))
+    .map((part) => (!part.thought && typeof part.text === "string" ? part.text : ""))
     .join("")
     .trim();
 }
@@ -65,6 +65,12 @@ export default async function handler(request, response) {
     return sendError(response, 400, "지원하지 않는 Gemini 모델입니다.");
   }
 
+  if (!Array.isArray(messages) || messages.some((message) =>
+    !message || typeof message.content !== "string" || !["user", "assistant"].includes(message.role)
+  )) {
+    return sendError(response, 400, "messages는 user 또는 assistant 역할과 문자열 content를 가진 배열이어야 합니다.");
+  }
+
   const contents = toGeminiContents(messages);
   if (contents.length === 0) {
     return sendError(response, 400, "전송할 메시지가 없습니다.");
@@ -73,16 +79,14 @@ export default async function handler(request, response) {
   let geminiResponse;
   try {
     geminiResponse = await fetch(
-      `${GEMINI_ENDPOINT}/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+      `${GEMINI_ENDPOINT}/${model}:generateContent`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
         body: JSON.stringify({
           contents,
           generationConfig: {
-            temperature: 0.7,
-            topP: 0.9,
-            maxOutputTokens: 2048
+            maxOutputTokens: 8192
           }
         })
       }
